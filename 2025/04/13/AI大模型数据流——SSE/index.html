@@ -222,6 +222,7 @@
 
         <div class="post-content">
             <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近项目需求，开发与AI相关的功能，接触到一些AI大模型相关的技术，其中前端处理大模型返回的数据流是必不可少的一环，流式SSE处理工具fetch-event-source，可以很好的解决这个问题。</p>
+<p>其次 <code>MCP</code> 也定义了两种标准的数据格式，<code>stdio</code>以及<code>sse</code>，其中<code>stdio</code>是标准输入输出(对本地集成和命令行工具特别有用)，<code>sse</code>是服务器发送事件，这两种数据格式在AI大模型中非常常见。</p>
 <h2 id="什么是SSE"><a href="#什么是SSE" class="headerlink" title="什么是SSE"></a>什么是SSE</h2><p>SSE(Server-Sent Events)是一种服务器向浏览器发送事件的机制。它允许服务器向浏览器发送实时数据，而不需要浏览器发起请求。SSE是一种单向的、基于HTTP的协议，适用于需要实时数据传输的场景。</p>
 <h2 id="传统处理方式"><a href="#传统处理方式" class="headerlink" title="传统处理方式"></a>传统处理方式</h2><p>浏览器内置<code>EventSource</code>对象，可以很方便的实现SSE处理。不过这个<code>EventSource</code>有一个非常致命的缺点，那就是<strong>只支持GET类型的请求，并且不支持任何自定义的头部</strong>。需要与业务交互，显然是不可接受的。</p>
 <p><a href="https://developer.mozilla.org/en-US/docs/Web/API/EventSource/EventSource" target="_blank" rel="noopener">EventSource官方链接</a></p>
