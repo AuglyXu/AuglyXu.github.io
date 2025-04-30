@@ -20,6 +20,15 @@
   </url>
   
   <url>
+    <loc>http://auglyxu.github.io/category/index.html</loc>
+    
+    <lastmod>2025-04-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://auglyxu.github.io/commonweal/index.html</loc>
     
     <lastmod>2025-04-22</lastmod>
@@ -30,15 +39,6 @@
   
   <url>
     <loc>http://auglyxu.github.io/schedule/index.html</loc>
-    
-    <lastmod>2025-04-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://auglyxu.github.io/category/index.html</loc>
     
     <lastmod>2025-04-22</lastmod>
     
@@ -182,7 +182,7 @@
   </url>
   
   <url>
-    <loc>http://auglyxu.github.io/2022/07/28/TS%E9%AB%98%E7%BA%A7%E7%B1%BB%E5%9E%8B/</loc>
+    <loc>http://auglyxu.github.io/2022/09/18/lerna%E5%8C%85%E7%AE%A1%E7%90%86/</loc>
     
     <lastmod>2025-04-22</lastmod>
     
@@ -191,7 +191,7 @@
   </url>
   
   <url>
-    <loc>http://auglyxu.github.io/2022/09/18/lerna%E5%8C%85%E7%AE%A1%E7%90%86/</loc>
+    <loc>http://auglyxu.github.io/2022/07/28/TS%E9%AB%98%E7%BA%A7%E7%B1%BB%E5%9E%8B/</loc>
     
     <lastmod>2025-04-22</lastmod>
     
@@ -218,7 +218,7 @@
   </url>
   
   <url>
-    <loc>http://auglyxu.github.io/2022/06/24/React-commit%E9%98%B6%E6%AE%B5/</loc>
+    <loc>http://auglyxu.github.io/2021/06/01/React-render%E9%98%B6%E6%AE%B5%E4%B8%80/</loc>
     
     <lastmod>2025-04-22</lastmod>
     
@@ -227,7 +227,7 @@
   </url>
   
   <url>
-    <loc>http://auglyxu.github.io/2021/06/01/React-render%E9%98%B6%E6%AE%B5%E4%B8%80/</loc>
+    <loc>http://auglyxu.github.io/2022/06/24/React-commit%E9%98%B6%E6%AE%B5/</loc>
     
     <lastmod>2025-04-22</lastmod>
     
@@ -353,13 +353,6 @@
   </url>
   
   <url>
-    <loc>http://auglyxu.github.io/tags/TypeScript/</loc>
-    <lastmod>2025-04-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>http://auglyxu.github.io/tags/%E5%B7%A5%E7%A8%8B%E5%8C%96/</loc>
     <lastmod>2025-04-30</lastmod>
     <changefreq>weekly</changefreq>
@@ -381,7 +374,7 @@
   </url>
   
   <url>
-    <loc>http://auglyxu.github.io/tags/%E7%AE%97%E6%B3%95/</loc>
+    <loc>http://auglyxu.github.io/tags/TypeScript/</loc>
     <lastmod>2025-04-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -396,6 +389,13 @@
   
   <url>
     <loc>http://auglyxu.github.io/tags/webpack/</loc>
+    <lastmod>2025-04-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://auglyxu.github.io/tags/%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2025-04-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -446,13 +446,6 @@
   </url>
   
   <url>
-    <loc>http://auglyxu.github.io/category/TypeScript/</loc>
-    <lastmod>2025-04-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>http://auglyxu.github.io/category/%E5%B7%A5%E7%A8%8B%E5%8C%96/</loc>
     <lastmod>2025-04-30</lastmod>
     <changefreq>weekly</changefreq>
@@ -460,7 +453,7 @@
   </url>
   
   <url>
-    <loc>http://auglyxu.github.io/category/%E7%AE%97%E6%B3%95/</loc>
+    <loc>http://auglyxu.github.io/category/TypeScript/</loc>
     <lastmod>2025-04-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -468,6 +461,13 @@
   
   <url>
     <loc>http://auglyxu.github.io/category/webpack/</loc>
+    <lastmod>2025-04-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://auglyxu.github.io/category/%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2025-04-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
