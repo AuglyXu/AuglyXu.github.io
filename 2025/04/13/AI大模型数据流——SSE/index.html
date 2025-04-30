@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="王八吉吉">
+
+
+    <meta name="subtitle" content="前端小匠">
+
+
+    <meta name="description" content="专心学技术">
+
+
+    <meta name="keywords" content="前端">
+
+
+<title>AI大模型数据流SSE处理工具——fetch-event-source | Gaxy</title>
+
+
+
+    <link rel="icon" href="/favicon.png">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+    <script>
+        // this function is used to check current theme before page loaded.
+        (() => {
+            const currentTheme = window.localStorage && window.localStorage.getItem('theme') || '';
+            const isDark = currentTheme === 'dark';
+            const pagebody = document.getElementsByTagName('body')[0]
+            if (isDark) {
+                pagebody.classList.add('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Dark"
+            } else {
+                pagebody.classList.remove('dark-theme');
+                // mobile
+                document.getElementById("mobile-toggle-theme").innerText = "· Light"
+            }
+        })();
+    </script>
+
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">Gaxy</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">归档</a>
+                
+                    <a class="menu-item" href="/category">分类</a>
+                
+                    <a class="menu-item" href="/tag">标签</a>
+                
+                    <a class="menu-item" href="/about">关于</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">Gaxy</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">归档</a>
+                
+                    <a class="menu-item" href="/category">分类</a>
+                
+                    <a class="menu-item" href="/tag">标签</a>
+                
+                    <a class="menu-item" href="/about">关于</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+            <div class="main">
+                <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    var tocbot_timer;
+    var DEPTH_MAX = 6;    // 为 6 时展开所有
+    var tocbot_default_config = {
+        tocSelector: '.tocbot-list',
+        contentSelector: '.post-content',
+        headingSelector: 'h1, h2, h3, h4, h5',
+        orderedList: false,
+        scrollSmooth: true,
+        onClick: extend_click,
+    };
+
+    function extend_click() {
+        clearTimeout(tocbot_timer);
+        tocbot_timer = setTimeout(function () {
+            tocbot.refresh(obj_merge(tocbot_default_config, { hasInnerContainers: true }));
+        }, 420); // 这个值是由 tocbot 源码里定义的 scrollSmoothDuration 得来的
+    }
+
+    document.ready(function () {
+        tocbot.init(obj_merge(tocbot_default_config, { collapseDepth: 1 }));
+    });
+
+    function expandToc() {
+        var b = document.querySelector('.tocbot-toc-expand');
+        var expanded = b.getAttribute('data-expanded');
+        expanded ? b.removeAttribute('data-expanded') : b.setAttribute('data-expanded', true);
+        tocbot.refresh(obj_merge(tocbot_default_config, { collapseDepth: expanded ? 1 : DEPTH_MAX }));
+        b.innerText = expanded ? 'Expand all' : 'Collapse all';
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function obj_merge(target, source) {
+        for (var item in source) {
+            if (source.hasOwnProperty(item)) {
+                target[item] = source[item];
+            }
+        }
+        return target;
+    }
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">AI大模型数据流SSE处理工具——fetch-event-source</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">王八吉吉</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">四月 13, 2025&nbsp;&nbsp;15:01:00</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/category/AI/">AI</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近项目需求，开发与AI相关的功能，接触到一些AI大模型相关的技术，其中前端处理大模型返回的数据流是必不可少的一环，流式SSE处理工具fetch-event-source，可以很好的解决这个问题。</p>
+<p>其次 <code>MCP</code> 也定义了两种标准的数据格式，<code>stdio</code>以及<code>sse</code>，其中<code>stdio</code>是标准输入输出(对本地集成和命令行工具特别有用)，<code>sse</code>是服务器发送事件，这两种数据格式在AI大模型中非常常见。</p>
+<h2 id="什么是SSE"><a href="#什么是SSE" class="headerlink" title="什么是SSE"></a>什么是SSE</h2><p>SSE(Server-Sent Events)是一种服务器向浏览器发送事件的机制。它允许服务器向浏览器发送实时数据，而不需要浏览器发起请求。SSE是一种单向的、基于HTTP的协议，适用于需要实时数据传输的场景。</p>
+<h2 id="传统处理方式"><a href="#传统处理方式" class="headerlink" title="传统处理方式"></a>传统处理方式</h2><p>浏览器内置<code>EventSource</code>对象，可以很方便的实现SSE处理。不过这个<code>EventSource</code>有一个非常致命的缺点，那就是<strong>只支持GET类型的请求，并且不支持任何自定义的头部</strong>。需要与业务交互，显然是不可接受的。</p>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/EventSource/EventSource" target="_blank" rel="noopener">EventSource官方链接</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> response = <span class="keyword">await</span> fetch(url, &#123;</span><br><span class="line">    method: <span class="string">'GET'</span>,</span><br><span class="line">    headers: &#123;</span><br><span class="line">        <span class="string">'Content-Type'</span>: <span class="string">'text/event-stream'</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="microsoft-fetch-event-source"><a href="#microsoft-fetch-event-source" class="headerlink" title="@microsoft/fetch-event-source"></a>@microsoft/fetch-event-source</h2><p>@microsoft/fetch-event-source 是一个用于处理服务器发送事件（SSE）的工具，它提供了一种方便的方式来接收和处理来自服务器的实时数据流。这个包的主要作用是提供一个遵循 <code>WHATWG Fetch</code> 标准的 API 来处理 SSE。实际上目前的ChatGPT实现的双向信息流也是基于这个库进行开发的</p>
+<ul>
+<li><p>允许我们可以和对应的url地址简历持久连接</p>
+</li>
+<li><p>允许我们在接收数据流信息的同时将我们想要发送的消息也通过相同的url进行发送</p>
+</li>
+</ul>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install @microsoft/fetch-event-source</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; fetchEventSource &#125; <span class="keyword">from</span> <span class="string">'@microsoft/fetch-event-source'</span>;</span><br><span class="line"></span><br><span class="line">fetchEventSource(url, &#123;</span><br><span class="line">    onmessage: <span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(event);</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="简单封装"><a href="#简单封装" class="headerlink" title="简单封装"></a>简单封装</h3><p>封装参考开源项目 Wren AI</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; EventStreamContentType, fetchEventSource &#125; <span class="keyword">from</span> <span class="string">'@microsoft/fetch-event-source'</span>;</span><br><span class="line"></span><br><span class="line">commonSseProcess(</span><br><span class="line">		url: string,</span><br><span class="line">		params: &#123;</span><br><span class="line">			options: any;</span><br><span class="line">			signal?: AbortSignal;</span><br><span class="line">			startCallback: <span class="function">(<span class="params">chunk: string</span>) =&gt;</span> <span class="keyword">void</span>;</span><br><span class="line">			messageRecived: <span class="function">(<span class="params">chunk: string, eventName?: string</span>) =&gt;</span> <span class="keyword">void</span>;</span><br><span class="line">			doneCallback: <span class="function">(<span class="params">chunk: string</span>) =&gt;</span> <span class="keyword">void</span>;</span><br><span class="line">			errorCallback: <span class="function">(<span class="params">error: string</span>) =&gt;</span> <span class="keyword">void</span>;</span><br><span class="line">		&#125;,</span><br><span class="line">	) &#123;</span><br><span class="line">		fetchEventSource(url, &#123;</span><br><span class="line">			method: <span class="string">'POST'</span>,</span><br><span class="line">			headers: &#123;</span><br><span class="line">				<span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>,</span><br><span class="line">			&#125;,</span><br><span class="line">			signal: params.signal,</span><br><span class="line">			body: <span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">				...params.options,</span><br><span class="line">			&#125;),</span><br><span class="line">			onopen: <span class="keyword">async</span> (response) =&gt; &#123;</span><br><span class="line">				<span class="keyword">const</span> resStatus = response.status;</span><br><span class="line">				<span class="keyword">const</span> resStatusText = response.statusText;</span><br><span class="line">				<span class="keyword">if</span> (response.ok &amp;&amp; response.headers.get(<span class="string">'content-type'</span>) === EventStreamContentType) &#123;</span><br><span class="line">					<span class="comment">// everything's good</span></span><br><span class="line">				&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">					<span class="keyword">this</span>.createErrorPromise(resStatus, resStatusText, response);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;,</span><br><span class="line">			onmessage(eventMessage) &#123;</span><br><span class="line">				<span class="keyword">if</span> (eventMessage.event === <span class="string">'START'</span>) &#123;</span><br><span class="line">					params.startCallback(eventMessage.data);</span><br><span class="line">					<span class="keyword">return</span>;</span><br><span class="line">				&#125; <span class="keyword">else</span> <span class="keyword">if</span> (eventMessage.event === <span class="string">'ERROR'</span>) &#123;</span><br><span class="line">					<span class="built_in">console</span>.log(<span class="string">`error:<span class="subst">$&#123;eventMessage&#125;</span>`</span>);</span><br><span class="line">					params.errorCallback(eventMessage.data);</span><br><span class="line">					<span class="keyword">return</span>;</span><br><span class="line">				&#125; <span class="keyword">else</span> <span class="keyword">if</span> (eventMessage.event === <span class="string">'END'</span>) &#123;</span><br><span class="line">					params.doneCallback(eventMessage.data);</span><br><span class="line">					<span class="keyword">return</span>;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// 会自动处理后端返回内容的首个空格，需在后端的返回内容前多加个空格，相关源码：https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133</span></span><br><span class="line">				params.messageRecived(eventMessage.data, eventMessage.event);</span><br><span class="line">			&#125;,</span><br><span class="line">			onerror(error) &#123;</span><br><span class="line">				<span class="built_in">console</span>.log(<span class="string">`sse error:<span class="subst">$&#123;error&#125;</span>`</span>);</span><br><span class="line">				params.errorCallback(error);</span><br><span class="line">				<span class="keyword">throw</span> error;</span><br><span class="line">			&#125;,</span><br><span class="line">			openWhenHidden: <span class="literal">true</span>,</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h4><ol>
+<li>后端返回的数据流<code>&lt;field&gt;:&lt;value&gt;</code> fetch-event-source只会处理冒号，后端返回的数据流为<code>&lt;field&gt;：&lt;value&gt;</code>，<strong>后端会处理冒号和冒号后面的空格</strong></li>
+</ol>
+<p>相关源码：</p>
+<p><a href="https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133" target="_blank" rel="noopener">https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L129-L133</a></p>
+<ol start="2">
+<li>当响应结果的content中包含有多行文本时，SSE会将包含有换行符的那一行内容替换为空字符串，故需要先将换行符与后面的内容拆分并转成，前端碰到换行标志时转成换行符处理<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">messageRecived: <span class="function">(<span class="params">chunk: string, eventName: STREAM_EVENT</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; question &#125; = options || &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当响应结果的content中包含有多行文本时，</span></span><br><span class="line"><span class="comment">     * SSE会将包含有换行符的那一行内容替换为空字符串，</span></span><br><span class="line"><span class="comment">     * 故需要先将换行符与后面的内容拆分并转成，前端碰到换行标志时转成换行符处理</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">const</span> processedChunk = chunk ? chunk.replace(<span class="string">'-_-_wrap_-_-'</span>, <span class="string">'\r\n'</span>) : chunk;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (onMessage) onMessage(processedChunk, eventName, conversationId, question);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> parsedData = <span class="built_in">JSON</span>.parse(processedChunk);</span><br><span class="line">        setData(parsedData <span class="keyword">as</span> T);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">'解析SSE消息失败:'</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+这个问题非常的隐蔽且难以理解，问题过程如下(后续会解释一下源码里的处理流程)<br>假设服务器发送了这样的数据：<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data: Hello\nWorld</span><br></pre></td></tr></table></figure>
+根据 SSE (Server-Sent Events) 规范，当数据中包含换行符 \n 时，应该被拆分成多个 “data:” 行发送：<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">data: Hello</span><br><span class="line">data: World</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>让我们看看数据是如何在代码中流动的：</p>
+<p>首先在 getLines 函数中：</p>
+<p><a href="https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L83-L85" target="_blank" rel="noopener">getLines源码</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当检测到换行符时，会将数据切分成行</span></span><br><span class="line"><span class="keyword">case</span> ControlChars.NewLine:</span><br><span class="line">    lineEnd = position;</span><br><span class="line">    <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+<p>然后在 getMessages 函数中：</p>
+<p><a href="https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/parse.ts#L141-L146" target="_blank" rel="noopener">getMessages源码</a></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="string">'data'</span>:</span><br><span class="line">    message.data = message.data</span><br><span class="line">        ? message.data + <span class="string">'\n'</span> + value</span><br><span class="line">        : value;</span><br><span class="line">    <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+<p>问题就出在这里：</p>
+<p>当第一行 data: Hello 到达时：message.data 为空，所以 message.data = “Hello”</p>
+<p>当第二行 data: World 到达时：message.data 已经有值，所以执行 message.data + ‘\n’ + value</p>
+<p>变成 “Hello\nWorld”</p>
+<p><strong>但是由于 SSE 的处理机制，这个包含换行符的内容可能会被错误地解析，导致内容被清空或丢失。</strong></p>
+<h2 id="microsoft-fetch-event-source-源码解析"><a href="#microsoft-fetch-event-source-源码解析" class="headerlink" title="@microsoft/fetch-event-source 源码解析"></a>@microsoft/fetch-event-source 源码解析</h2><h3 id="1-核心方法fetchEventSource"><a href="#1-核心方法fetchEventSource" class="headerlink" title="1. 核心方法fetchEventSource"></a>1. 核心方法fetchEventSource</h3><p><a href="https://github.com/Azure/fetch-event-source/blob/45ac3cfffd30b05b79fbf95c21e67d4ef59aa56a/src/fetch.ts#L56-L154" target="_blank" rel="noopener">核心方法源码</a></p>
+<h4 id="入参"><a href="#入参" class="headerlink" title="入参"></a>入参</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">fetchEventSource(input: RequestInfo, &#123; <span class="comment">// input为请求的url地址，后续fetch(input, ...)</span></span><br><span class="line">    signal: inputSignal, <span class="comment">// 请求的信号，用于取消请求</span></span><br><span class="line">    headers: inputHeaders, <span class="comment">// 请求的头部，用于设置请求的头部</span></span><br><span class="line">    onopen: inputOnOpen, <span class="comment">// 请求打开时的回调</span></span><br><span class="line">    onmessage, <span class="comment">// 收到消息时的回调</span></span><br><span class="line">    onclose, <span class="comment">// 请求关闭时的回调</span></span><br><span class="line">    onerror, <span class="comment">// 请求错误时的回调</span></span><br><span class="line">    openWhenHidden,</span><br><span class="line">    fetch: inputFetch, <span class="comment">// 请求的fetch方法，用于自定义请求</span></span><br><span class="line">    ...rest <span class="comment">// 其他参数</span></span><br><span class="line">&#125;: FetchEventSourceInit)</span><br></pre></td></tr></table></figure>
+
+<p>其中openWhenHidden的默认值为false，if false, 后续 <code>document.addEventListener(&#39;visibilitychange&#39;, onVisibilityChange);</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">onVisibilityChange</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    curRequestController.abort(); <span class="comment">// 每次可见性变化时关闭现有的请求</span></span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">document</span>.hidden) &#123;</span><br><span class="line">        create(); <span class="comment">// 页面现在可见，重新创建请求。</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="数据处理"><a href="#数据处理" class="headerlink" title="数据处理"></a>数据处理</h4><p>数据处理主要是<code>getBytes</code>  <code>getLines</code> <code>getMessages</code>，整个代码的核心部分像是一个洋葱圈模型，分别使用闭包记录了每一层的数据，从文本 -&gt; 行 -&gt; 消息</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> getBytes(</span><br><span class="line">    response.body!, </span><br><span class="line">    getLines(</span><br><span class="line">        getMessages(<span class="function"><span class="params">id</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (id) &#123;</span><br><span class="line">                <span class="comment">// store the id and send it back on the next retry:</span></span><br><span class="line">                headers[LastEventId] = id;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// don't send the last-event-id header anymore:</span></span><br><span class="line">                <span class="keyword">delete</span> headers[LastEventId];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, </span><br><span class="line">        retry =&gt; &#123;</span><br><span class="line">            retryInterval = retry;</span><br><span class="line">        &#125;, </span><br><span class="line">        onmessage</span><br><span class="line">    )</span><br><span class="line">));</span><br></pre></td></tr></table></figure>
+
+<h5 id="getBytes"><a href="#getBytes" class="headerlink" title="getBytes"></a>getBytes</h5><p>这个方法非常的简单，仅仅是读取后端返回的流，并调用<code>onChunk</code>回调函数，将流中的数据传递给<code>onChunk</code>，这个<code>onChunk</code>就是<code>getLines</code>返回的方法</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Converts a ReadableStream into a callback pattern.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>stream The input ReadableStream.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>onChunk A function that will be called on each new byte chunk in the stream.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns <span class="type">&#123;Promise&lt;void&gt;&#125;</span> </span>A promise that will be resolved when the stream closes.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">getBytes</span>(<span class="params">stream: ReadableStream&lt;Uint8Array&gt;, onChunk: (arr: Uint8Array</span>) =&gt; <span class="title">void</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> reader = stream.getReader();</span><br><span class="line">    <span class="keyword">let</span> result: ReadableStreamDefaultReadResult&lt;<span class="built_in">Uint8Array</span>&gt;;</span><br><span class="line">    <span class="keyword">while</span> (!(result = <span class="keyword">await</span> reader.read()).done) &#123;</span><br><span class="line">        onChunk(result.value);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="getLines"><a href="#getLines" class="headerlink" title="getLines"></a>getLines</h5><p>源码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment"> * 将任意字节块解析为 EventSource 行缓冲区。</span></span><br><span class="line"><span class="comment"> * 每行应为 "field: value" 格式，并以 \r、\n 或 \r\n 结尾。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>onLine 每次遇到新行时调用的函数。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns </span>一个应该为每个传入字节块调用的函数。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">getLines</span>(<span class="params">onLine: (line: Uint8Array, fieldLength: number</span>) =&gt; <span class="title">void</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> buffer: <span class="built_in">Uint8Array</span> | <span class="literal">undefined</span>;</span><br><span class="line">    <span class="keyword">let</span> position: number; <span class="comment">// 当前读取位置</span></span><br><span class="line">    <span class="keyword">let</span> fieldLength: number; <span class="comment">// 行的字段长度</span></span><br><span class="line">    <span class="keyword">let</span> discardTrailingNewline = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回一个可以处理每个传入字节块的函数：</span></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">onChunk</span>(<span class="params">arr: Uint8Array</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (buffer === <span class="literal">undefined</span>) &#123;</span><br><span class="line">            buffer = arr;</span><br><span class="line">            position = <span class="number">0</span>;</span><br><span class="line">            fieldLength = <span class="number">-1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 我们还在解析旧行。将新字节附加到缓冲区：</span></span><br><span class="line">            buffer = concat(buffer, arr);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> bufLength = buffer.length;</span><br><span class="line">        <span class="keyword">let</span> lineStart = <span class="number">0</span>; <span class="comment">// 当前行的起始位置</span></span><br><span class="line">        <span class="keyword">while</span> (position &lt; bufLength) &#123;</span><br><span class="line">            <span class="keyword">if</span> (discardTrailingNewline) &#123;</span><br><span class="line">                <span class="keyword">if</span> (buffer[position] === ControlChars.NewLine) &#123;</span><br><span class="line">                    lineStart = ++position; <span class="comment">// 跳到下一个字符</span></span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                discardTrailingNewline = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 向前查找直到行结束:</span></span><br><span class="line">            <span class="keyword">let</span> lineEnd = <span class="number">-1</span>; <span class="comment">// 行结束符的位置</span></span><br><span class="line">            <span class="keyword">for</span> (; position &lt; bufLength &amp;&amp; lineEnd === <span class="number">-1</span>; ++position) &#123;</span><br><span class="line">                <span class="keyword">switch</span> (buffer[position]) &#123;</span><br><span class="line">                    <span class="keyword">case</span> ControlChars.Colon:</span><br><span class="line">                        <span class="keyword">if</span> (fieldLength === <span class="number">-1</span>) &#123; <span class="comment">// 第一个冒号</span></span><br><span class="line">                            fieldLength = position - lineStart;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="comment">// @ts-ignore:7029 \r case below should fallthrough to \n:</span></span><br><span class="line">                    <span class="keyword">case</span> ControlChars.CarriageReturn:</span><br><span class="line">                        discardTrailingNewline = <span class="literal">true</span>;</span><br><span class="line">                    <span class="keyword">case</span> ControlChars.NewLine:</span><br><span class="line">                        lineEnd = position;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (lineEnd === <span class="number">-1</span>) &#123;</span><br><span class="line">                <span class="comment">// 我们到达了缓冲区的末尾，但行还没有结束。</span></span><br><span class="line">                <span class="comment">// 等待下一个 arr 并继续解析：</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 我们到达了行结束，发送出去：</span></span><br><span class="line">            onLine(buffer.subarray(lineStart, lineEnd), fieldLength);</span><br><span class="line">            lineStart = position; <span class="comment">// 我们现在在下一行</span></span><br><span class="line">            fieldLength = <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (lineStart === bufLength) &#123;</span><br><span class="line">            buffer = <span class="literal">undefined</span>; <span class="comment">// 我们读完了</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (lineStart !== <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 创建一个从 lineStart 开始的新视图到 buffer，这样我们就不需要在新 arr 时复制前面的行：</span></span><br><span class="line">            buffer = buffer.subarray(lineStart);</span><br><span class="line">            position -= lineStart;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是一个<strong>行缓冲解析器</strong>。</p>
+<p><strong>行缓冲解析器</strong>：</p>
+<p>行缓冲解析器是一种用于处理流式数据的解析器，它将输入数据分割成行，并提供回调函数来处理每一行（onLine方法）。</p>
+<p><code>onLine</code>前面一大段代码就是一个滑动窗口，当遇到<code>\r\n</code>时，会调用<code>onLine</code>方法，将窗口内的数据传递给<code>onLine</code>方法。<code>onLine</code>方法是下面的<code>getMessages</code>方法返回的方法，这里借用了闭包存储每一行的数据</p>
+<h5 id="getMessages"><a href="#getMessages" class="headerlink" title="getMessages"></a>getMessages</h5><p>源码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment"> * 将行缓冲区解析为 EventSourceMessages。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>onId 每次遇到 `id` 字段时调用的函数。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>onRetry 每次遇到 `retry` 字段时调用的函数。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>onMessage 每次遇到消息时调用的函数。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns </span>一个应该为每个传入行缓冲区调用的函数。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">getMessages</span>(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">    onId: (id: string</span>) =&gt; <span class="title">void</span>,</span></span><br><span class="line"><span class="function">    <span class="title">onRetry</span>: (<span class="params">retry: number</span>) =&gt; <span class="title">void</span>,</span></span><br><span class="line"><span class="function">    <span class="title">onMessage</span>?: (<span class="params">msg: EventSourceMessage</span>) =&gt; <span class="title">void</span></span></span><br><span class="line"><span class="function">) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> message = newMessage();</span><br><span class="line">    <span class="keyword">const</span> decoder = <span class="keyword">new</span> TextDecoder();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回一个可以处理每个传入行缓冲区的函数：</span></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">onLine</span>(<span class="params">line: Uint8Array, fieldLength: number</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (line.length === <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// 空行表示消息结束。触发回调并开始新消息：</span></span><br><span class="line">            onMessage?.(message);</span><br><span class="line">            message = newMessage();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (fieldLength &gt; <span class="number">0</span>) &#123; <span class="comment">// 排除注释和没有值的行</span></span><br><span class="line">            <span class="comment">// line is of format "&lt;field&gt;:&lt;value&gt;" or "&lt;field&gt;: &lt;value&gt;"</span></span><br><span class="line">            <span class="comment">// https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation</span></span><br><span class="line">            <span class="keyword">const</span> field = decoder.decode(line.subarray(<span class="number">0</span>, fieldLength));</span><br><span class="line">            <span class="keyword">const</span> valueOffset = fieldLength + (line[fieldLength + <span class="number">1</span>] === ControlChars.Space ? <span class="number">2</span> : <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">const</span> value = decoder.decode(line.subarray(valueOffset));</span><br><span class="line"></span><br><span class="line">            <span class="keyword">switch</span> (field) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">'data'</span>:</span><br><span class="line">                    <span class="comment">// 如果此消息已经有数据，则将新值附加到旧值。</span></span><br><span class="line">                    <span class="comment">// 否则，只需设置为新值：</span></span><br><span class="line">                    message.data = message.data</span><br><span class="line">                        ? message.data + <span class="string">'\n'</span> + value</span><br><span class="line">                        : value; <span class="comment">// 否则，只需设置为新值：</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">'event'</span>:</span><br><span class="line">                    message.event = value;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">'id'</span>:</span><br><span class="line">                    onId(message.id = value);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">'retry'</span>:</span><br><span class="line">                    <span class="keyword">const</span> retry = <span class="built_in">parseInt</span>(value, <span class="number">10</span>);</span><br><span class="line">                    <span class="keyword">if</span> (!<span class="built_in">isNaN</span>(retry)) &#123; <span class="comment">// 根据规范，忽略非整数</span></span><br><span class="line">                        onRetry(message.retry = retry);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个方法的逻辑是：</p>
+<ol>
+<li><p>创建一个<code>message</code>对象，用于存储每一行的数据</p>
+</li>
+<li><p>创建一个<code>decoder</code>对象，用于解码<code>line</code>中的数据</p>
+</li>
+<li><p>返回一个<code>onLine</code>方法，用于处理每一行的数据</p>
+</li>
+<li><p>在<code>onLine</code>方法中，会根据<code>field</code>的值，将数据存储到<code>message</code>对象中</p>
+</li>
+<li><p>当遇到<code>\r\n</code>时，会调用<code>onMessage</code>方法，将<code>message</code>对象传递给<code>onMessage</code>方法</p>
+</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">data: 第一行数据</span><br><span class="line">data: 第二行数据</span><br><span class="line"></span><br><span class="line">此时会走 message.data + <span class="string">'\n'</span> + value</span><br><span class="line"></span><br><span class="line">最终message.data = <span class="string">'第一行数据\n第二行数据'</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文详细介绍了在AI大模型开发中处理数据流的重要工具 @microsoft/fetch-event-source。主要包含以下几个要点：</p>
+<ol>
+<li><p>SSE(Server-Sent Events)是一种服务器向浏览器发送实时数据的单向通信机制。</p>
+</li>
+<li><p>传统的EventSource对象虽然能处理SSE，但仅支持GET请求且不支持自定义头部，限制了其实际应用场景。</p>
+</li>
+<li><p>@microsoft/fetch-event-source提供了更灵活的解决方案：</p>
+<ul>
+<li>支持POST请求和自定义头部</li>
+<li>允许建立持久连接</li>
+<li>支持双向数据流通信</li>
+</ul>
+</li>
+<li><p>在实际使用中需要注意几个关键点：</p>
+<ul>
+<li>后端返回的数据流格式需要严格遵循<code>&lt;field&gt;:&lt;value&gt;</code>的格式</li>
+<li>处理多行文本时需要特别注意换行符的处理</li>
+<li>建议使用封装好的通用处理方法来简化开发</li>
+</ul>
+</li>
+<li><p>源码层面，该库通过<code>getBytes</code>、<code>getLines</code>和<code>getMessages</code>三层处理机制，实现了对SSE数据流的完整解析和处理。</p>
+</li>
+</ol>
+<p>这个工具为AI大模型应用开发提供了可靠的数据流处理方案，特别适合类似ChatGPT这样需要流式响应的应用场景。</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>王八吉吉</span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>Permalink:</span>
+                        <span><a href="http://auglyxu.github.io/2025/04/13/AI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E2%80%94%E2%80%94SSE/">http://auglyxu.github.io/2025/04/13/AI%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E2%80%94%E2%80%94SSE/</a></span>
+                    </p>
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+                     <p class="copyright-item">
+                         <span>Slogan:</span>
+                         <span>享受当下</span>
+                     </p>
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tags/AI/"># AI</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2025/04/30/Markdown%E6%B8%B2%E6%9F%93%E5%B7%A5%E5%85%B7%E2%80%94%E2%80%94markdown-it/">Markdown渲染工具——markdown-it</a>
+            
+            
+            <a class="next" rel="next" href="/2022/10/18/react-hook-form%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">react-hook-form解决方案</a>
+            
+        </section>
+
+        <!-- 添加评论系统 -->
+        
+<div id="gitalk-container"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script>
+  const gitalk = new Gitalk({
+    clientID: 'ebab0fe0ea5c0f618928',
+    clientSecret: 'ecc8028cad6d86df16355d626e0aeb52ccc91aab',
+    repo: 'AuglyXu.github.io',
+    owner: 'AuglyXu',
+    admin: ['AuglyXu'],
+    id: location.pathname, // 页面的唯一标识
+    distractionFreeMode: true,
+    language: 'zh-CN'
+  })
+  gitalk.render('gitalk-container')
+</script>
+ 
+
+    </article>
+</div>
+
+            </div>
+            <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© 王八吉吉 | Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://github.com/Siricee/hexo-theme-Chic" target="_blank">Chic</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+
+</html>
